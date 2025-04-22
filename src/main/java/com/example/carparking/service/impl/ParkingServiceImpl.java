@@ -1,11 +1,13 @@
 package com.example.carparking.service.impl;
-
-
 import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.example.carparking.dto.ParkingMapper;
@@ -20,6 +22,8 @@ import com.example.carparking.service.ParkingService;
 
 @Service
 public class ParkingServiceImpl implements ParkingService {
+	
+	 private static final Logger logger = LoggerFactory.getLogger(ParkingServiceImpl.class);
 
     private final ParkingSlotRepository slotRepository;
     private final ParkingTicketRepository ticketRepository;
@@ -42,6 +46,8 @@ public class ParkingServiceImpl implements ParkingService {
                 .findFirst()
                 .orElseThrow(() -> new ParkingSlotNotFoundException("No available parking slots"));
 
+        logger.info("fecthing parking slots {}", slot);
+        
         slot.setOccupied(true);
         slot.setOccupiedAt(LocalDateTime.now());
         slot.setOccupiedByLicensePlate(ticketDTO.getLicensePlate());
@@ -53,12 +59,13 @@ public class ParkingServiceImpl implements ParkingService {
 
         slotRepository.save(slot);
         ParkingTicket saved = ticketRepository.save(ticket);
-
+        logger.info("save parking slots {}", saved);
         return mapper.toTicketDTO(saved);
     }
 
     @Override
     public ParkingTicketDTO handleVehicleExit(Long ticketId) {
+    	 logger.info("handling vehicle exit ticketId {}", ticketId);
         ParkingTicket ticket = ticketRepository.findById(ticketId)
                 .orElseThrow(() -> new RuntimeException("Ticket not found"));
 
@@ -79,17 +86,18 @@ public class ParkingServiceImpl implements ParkingService {
 
         slotRepository.save(slot);
         ticketRepository.save(ticket);
-
+        logger.info("handling vehicle exit ticket {}", ticket);
         return mapper.toTicketDTO(ticket);
     }
 
     private BigDecimal calculateFee(Duration duration) {
         long hours = Math.max(1, duration.toHours()); // minimum 1 hour
-        return BigDecimal.valueOf(hours * 10); // Flat rate: $10/hr (can vary by slotType)
+        return BigDecimal.valueOf(hours * 10); // Flat rate: Rs.10/hr (can vary by slotType)
     }
 
     @Override
     public List<ParkingSlotDTO> getAvailableSlots() {
+    	 logger.info("fetching available slots");
         List<ParkingSlot> slots = slotRepository.findByIsOccupiedFalse();
         return mapper.toSlotDTOList(slots.stream()
                 .filter(s -> s.getReservedUntil() == null || s.getReservedUntil().isBefore(LocalDateTime.now()))
@@ -98,6 +106,7 @@ public class ParkingServiceImpl implements ParkingService {
 
     @Override
     public ParkingSlotDTO reserveSlot(ParkingSlotDTO slotDTO) {
+    	 logger.info("reserve slot  : {}", slotDTO);
         ParkingSlot slot = slotRepository.findById(slotDTO.getId())
                 .orElseThrow(() -> new ParkingSlotNotFoundException("Slot not found"));
 
@@ -107,6 +116,7 @@ public class ParkingServiceImpl implements ParkingService {
 
     @Override
     public void cancelReservation(Long id) {
+    	 logger.info("cancel reservation by id : {}", id);
         ParkingSlot slot = slotRepository.findById(id)
                 .orElseThrow(() -> new ParkingSlotNotFoundException("Slot not found"));
         slot.setReservedUntil(null);
@@ -115,11 +125,22 @@ public class ParkingServiceImpl implements ParkingService {
 
     @Override
     public List<ParkingTicketDTO> searchByLicensePlate(String licensePlate) {
+    	 logger.info("search by licensePlate : {}", licensePlate);
         return mapper.toTicketDTOList(ticketRepository.findByLicensePlateContainingIgnoreCase(licensePlate));
     }
 
     @Override
     public List<ParkingTicketDTO> getParkingHistory(String licensePlate) {
+    	 logger.info("get parking history by licensePlate : {}", licensePlate);
         return mapper.toTicketDTOList(ticketRepository.findByLicensePlateOrderByEntryTimeDesc(licensePlate));
     }
+    
+    @Override
+    public Page<ParkingTicketDTO> getAllParkingHistory(Pageable pageable) {
+    	 logger.info("get all parking history pageable : {}", pageable);
+        return ticketRepository.findAll(pageable)
+                .map(mapper::toTicketDTO);
+    }
+
+   
 }

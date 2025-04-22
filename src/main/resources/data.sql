@@ -15,8 +15,7 @@ INSERT INTO parking_tickets (license_plate, entry_time, exit_time, fee_charged, 
 
 INSERT INTO users (username, password) VALUES ('alice', '$2a$12$Ok/OOEOmb0mo11UILZWHAeEpLG0DPdDjZ97eMdVTidbPZq6lF0E6u');--password123
 INSERT INTO users (username, password) VALUES ('bob', '$2a$12$Ok/OOEOmb0mo11UILZWHAeEpLG0DPdDjZ97eMdVTidbPZq6lF0E6u');
-INSERT INTO users (username, password) VALUES ('charlie', 'charlie123');
-INSERT INTO users (username, password) VALUES ('diana', 'mypassword');
+
 
 
 INSERT INTO role (name) VALUES ('ROLE_USER');

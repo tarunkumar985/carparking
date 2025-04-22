@@ -21,4 +21,6 @@ public interface ParkingMapper {
     ParkingTicketDTO toTicketDTO(ParkingTicket ticket);
     ParkingTicket toTicketEntity(ParkingTicketDTO dto);
     List<ParkingTicketDTO> toTicketDTOList(List<ParkingTicket> tickets);
+    
+
 }

@@ -2,6 +2,9 @@ package com.example.carparking.service;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import com.example.carparking.dto.ParkingSlotDTO;
 import com.example.carparking.dto.ParkingTicketDTO;
 
@@ -13,4 +16,9 @@ public interface ParkingService {
     void cancelReservation(Long id);
     List<ParkingTicketDTO> searchByLicensePlate(String licensePlate);
     List<ParkingTicketDTO> getParkingHistory(String licensePlate);
+	
+    
+    
+    
+    Page<ParkingTicketDTO> getAllParkingHistory(Pageable pageable);
 }

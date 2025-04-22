@@ -6,6 +6,10 @@ import com.example.carparking.dto.ParkingSlotDTO;
 import com.example.carparking.dto.ParkingTicketDTO;
 import com.example.carparking.service.ParkingService;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -61,5 +65,11 @@ public class ParkingController {
     @GetMapping("/history/{licensePlate}")
     public List<ParkingTicketDTO> getParkingHistory(@PathVariable String licensePlate) {
         return parkingService.getParkingHistory(licensePlate);
+    }
+    
+    @GetMapping("/history")
+    public Page<ParkingTicketDTO> getAllParkingHistory(
+            @PageableDefault(size = 1, sort = "entryTime", direction = Direction.DESC) Pageable pageable) {
+        return parkingService.getAllParkingHistory(pageable);
     }
 }
